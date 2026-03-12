@@ -1,0 +1,12 @@
+brew "git"
+brew "node"
+brew "docker"
+brew "jq"
+brew "tree"
+brew "wget"
+
+cask "google-chrome"
+cask "visual-studio-code"
+cask "docker"
+cask "slack"
+cask "postman"
