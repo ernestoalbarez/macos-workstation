@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+
+    <key>Label</key>
+    <string>busy.mirror</string>
+
+    <key>ProgramArguments</key>
+    <array>
+        <string>~/macos-workstation/scripts/calendar-mirror/busy_mirror</string>
+    </array>
+
+    <key>StartInterval</key>
+    <integer>300</integer>
+
+    <key>RunAtLoad</key>
+    <true/>
+
+    <key>StandardOutPath</key>
+    <string>/tmp/busy_mirror.log</string>
+
+    <key>StandardErrorPath</key>
+    <string>/tmp/busy_mirror.error.log</string>
+
+</dict>
+</plist>
