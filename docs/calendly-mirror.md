@@ -104,21 +104,23 @@ This calendar must be connected to the same account used by Calendly.
 
 ### Step 2 — Compile the script
 
-Navigate to the script directory:
+Navigate to the repository:
 ```bash
-cd scripts/calendar-mirror
+cd macos-workstation
 ```
 
-Compile the Swift script:
+Compile the Swift script to the local bin directory:
 ```bash
-swiftc busy_mirror.swift -o busy_mirror
+mkdir -p ~/bin
+swiftc scripts/calendar-mirror/busy_mirror.swift -o ~/bin/busy_mirror
 ```
 
 ### Step 3 — Install LaunchAgent
 
-Copy the LaunchAgent configuration:
+Copy the LaunchAgent configuration from the dedicated `launchd` directory:
 ```bash
-cp busy.mirror.plist ~/Library/LaunchAgents/
+mkdir -p ~/Library/LaunchAgents
+cp launchd/busy.mirror.plist ~/Library/LaunchAgents/
 ```
 
 Load the agent:
