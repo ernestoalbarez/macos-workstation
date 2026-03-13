@@ -8,7 +8,7 @@
 
     <key>ProgramArguments</key>
     <array>
-        <string>~/macos-workstation/scripts/calendar-mirror/busy_mirror</string>
+        <string>~/bin/busy_mirror</string>
     </array>
 
     <key>StartInterval</key>
