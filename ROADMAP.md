@@ -18,19 +18,7 @@ xcode-select --install
 
 ---
 
-## Step 2 — Install Homebrew
-```bash
-/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
-```
-
-Verify:
-```bash
-brew doctor
-```
-
----
-
-## Step 3 — Clone workstation repository
+## Step 2 — Clone workstation repository
 ```bash
 git clone git@github.com:ernestoalbarez/macos-workstation.git
 cd macos-workstation
@@ -38,16 +26,18 @@ cd macos-workstation
 
 ---
 
-## Step 4 — Run bootstrap
+## Step 3 — Run bootstrap
 
 ```bash
 chmod +x bootstrap.sh
 ./bootstrap.sh
 ```
 
+> *Note: For advanced configuration, you can also explore and run the individual scripts located in `scripts/install/` to customize apps, macOS preferences, and terminal setup independently.*
+
 ---
 
-## Step 5 — Configure Git
+## Step 4 — Configure Git
 
 ```bash
 git config --global push.autoSetupRemote true
@@ -86,7 +76,7 @@ Terminal output:
 > Hi ernestoalbarez! You've successfully authenticated...
 ---
 
-## Step 6 — Verify environment
+## Step 5 — Verify environment
 
 Check installed tools:
 
@@ -98,7 +88,7 @@ git -v
 
 --- 
 
-## Step 7 — Validate automations
+## Step 6 — Validate automations
 
 Check calendar mirror:
 
