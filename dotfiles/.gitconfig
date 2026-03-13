@@ -1,0 +1,34 @@
+[user]
+    name = Ernesto Albarez
+    email = ernestoalbrz@gmail.com
+
+[init]
+    # Set main as the default branch for new repositories
+    defaultBranch = main
+
+[pull]
+    # Merge instead of rebase on pull
+    rebase = false
+
+[core]
+    # Use VS Code as the default editor
+    editor = code --wait
+    # Handle line endings correctly
+    autocrlf = input
+
+[color]
+    # Enable automatic color output
+    ui = auto
+
+[alias]
+    # Common shortcuts
+    st = status
+    co = checkout
+    br = branch
+    ci = commit
+    # Pretty log format
+    lg = log --oneline --graph --decorate --all
+
+[push]
+    # Automatically setup remote tracking branch
+    autoSetupRemote = true

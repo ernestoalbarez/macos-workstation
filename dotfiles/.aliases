@@ -1,0 +1,17 @@
+# Git shortcuts
+alias gs="git status"   # Show working tree status
+alias ga="git add"      # Add file contents to the index
+alias gc="git commit"   # Record changes to the repository
+alias gp="git push"     # Update remote refs along with associated objects
+
+# Navigation
+alias ..="cd .."        # Go up one directory
+alias ...="cd ../.."    # Go up two directories
+
+# List files
+alias ll="ls -lah"      # List files with detailed information and hidden files
+
+# Docker
+alias dps="docker ps"         # List containers
+alias dcu="docker compose up" # Build, (re)create, start, and attach to containers for a service
+alias dcd="docker compose down" # Stop and remove containers, networks, images, and volumes
