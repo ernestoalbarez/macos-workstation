@@ -9,10 +9,56 @@ let excluded = [
 "Cumpleaños",
 "United States Holidays",
 "Holidays in Argentina",
+"Días festivos de España",
+"Ratitas 2.0"
 ]
 
 let bufferMinutes = 10
 let buffer: TimeInterval = TimeInterval(bufferMinutes * 60)
+
+func isBusinessTime(_ start: Date, _ end: Date) -> Bool {
+
+    let cal = Calendar.current
+    let weekday = cal.component(.weekday, from: start)
+
+    // domingo o sábado
+    if weekday == 1 || weekday == 7 {
+        return false
+    }
+
+    let hourStart = cal.component(.hour, from: start)
+    let hourEnd = cal.component(.hour, from: end)
+
+    if hourStart < 9 || hourEnd > 18 {
+        return false
+    }
+
+    return true
+}
+
+func mergeBusyBlocks(_ blocks: [(Date, Date)]) -> [(Date, Date)] {
+
+    if blocks.isEmpty { return [] }
+
+    let sorted = blocks.sorted { $0.0 < $1.0 }
+
+    var merged: [(Date, Date)] = []
+    var current = sorted[0]
+
+    for block in sorted.dropFirst() {
+
+        if block.0 <= current.1 {
+            current.1 = max(current.1, block.1)
+        } else {
+            merged.append(current)
+            current = block
+        }
+    }
+
+    merged.append(current)
+
+    return merged
+}
 
 store.requestFullAccessToEvents { granted, error in
 
@@ -33,102 +79,80 @@ store.requestFullAccessToEvents { granted, error in
 
     /*
      STEP 1
-     Leer Busy existentes
-    */
-
-    let existingPredicate = store.predicateForEvents(withStart: now, end: future, calendars: [target])
-    let existingBusy = store.events(matching: existingPredicate)
-
-    var busyIndex = Set<String>()
-
-    for e in existingBusy {
-        if e.title == "Busy" {
-            let key = "\(e.startDate.timeIntervalSince1970)-\(e.endDate.timeIntervalSince1970)"
-            busyIndex.insert(key)
-        }
-    }
-
-    /*
-     STEP 2
-     Leer eventos reales
+     Obtener eventos reales
     */
 
     let sourceCalendars = calendars.filter {
         $0.title != targetCalendarName && !excluded.contains($0.title)
     }
 
-    let predicate = store.predicateForEvents(withStart: now, end: future, calendars: sourceCalendars)
+    let predicate = store.predicateForEvents(
+        withStart: now,
+        end: future,
+        calendars: sourceCalendars
+    )
+
     let events = store.events(matching: predicate)
 
     /*
-     STEP 3
-     Crear bloques ocupados con buffer
+     STEP 2
+     Generar bloques busy
     */
 
-    var blocks: [(Date, Date)] = []
+    var busyBlocks: [(Date, Date)] = []
 
-    for e in events {
+    for event in events {
 
-        if e.isAllDay { continue }
+        if event.isAllDay { continue }
 
-        if e.availability == .free { continue }
+        let busyStart = event.startDate.addingTimeInterval(-buffer)
+        let busyEnd = event.endDate.addingTimeInterval(buffer)
 
-        var start = e.startDate.addingTimeInterval(-buffer)
-        let end = e.endDate.addingTimeInterval(buffer)
-
-        if start < now {
-            start = now
+        if !isBusinessTime(busyStart, busyEnd) {
+            continue
         }
 
-        blocks.append((start, end))
+        busyBlocks.append((busyStart, busyEnd))
     }
+
+    /*
+     STEP 3
+     Merge de bloques
+    */
+
+    let mergedBlocks = mergeBusyBlocks(busyBlocks)
 
     /*
      STEP 4
-     Ordenar bloques
+     Eliminar Busy antiguos generados por el script
     */
 
-    blocks.sort { $0.0 < $1.0 }
+    let existingPredicate = store.predicateForEvents(
+        withStart: now,
+        end: future,
+        calendars: [target]
+    )
 
-    /*
-     STEP 5
-     Fusionar bloques contiguos
-    */
+    let existingBusy = store.events(matching: existingPredicate)
 
-    var merged: [(Date, Date)] = []
+    for e in existingBusy {
 
-    for block in blocks {
+        if e.notes == "busy-mirror" {
 
-        if merged.isEmpty {
-            merged.append(block)
-            continue
-        }
-
-        var last = merged.removeLast()
-
-        if block.0 <= last.1 {
-            last.1 = max(last.1, block.1)
-            merged.append(last)
-        } else {
-            merged.append(last)
-            merged.append(block)
+            do {
+                try store.remove(e, span: .thisEvent)
+            } catch {
+                print("Error removing old busy event")
+            }
         }
     }
 
     /*
-     STEP 6
-     Crear Busy si no existe
+     STEP 5
+     Crear nuevos Busy
     */
 
-    var created = 0
-
-    for block in merged {
-
-        let key = "\(block.0.timeIntervalSince1970)-\(block.1.timeIntervalSince1970)"
-
-        if busyIndex.contains(key) {
-            continue
-        }
+    for block in mergedBlocks {
 
         let busy = EKEvent(eventStore: store)
 
@@ -136,13 +160,18 @@ store.requestFullAccessToEvents { granted, error in
         busy.title = "Busy"
         busy.startDate = block.0
         busy.endDate = block.1
+        busy.isAllDay = false
+        busy.notes = "busy-mirror"
 
-        try? store.save(busy, span: .thisEvent)
-
-        created += 1
+        do {
+            try store.save(busy, span: .thisEvent)
+            print("Busy block created \(block.0) - \(block.1)")
+        } catch {
+            print("Error creating busy block")
+        }
     }
 
-    print("Busy mirror updated (\(created) blocks created)")
+    print("Busy mirror sync finished")
 
     exit(0)
 }
